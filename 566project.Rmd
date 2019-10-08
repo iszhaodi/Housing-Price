@@ -1,0 +1,142 @@
+---
+title: "566project"
+author: "Di"
+date: "5/11/2019"
+output: word_document
+---
+
+```{r}
+#input data
+setwd("C:/Users/Di/Desktop/JOB/visualization")
+housing <- read.csv("data.csv", header = T)
+names(housing)[1] <- "ind"
+```
+
+```{r}
+housing[2] <- housing[,2]/1000
+housing[8] <- 1980 + housing[,8]
+#factor
+housing[5:8] <- lapply(housing[,5:8], as.factor)
+```
+
+#1 Description
+##Summary data
+```{r}
+summary(housing[,c(2:4,9)])
+str(housing[,-c(2:4,9)])
+```
+
+#rent
+
+
+
+#2 investigation
+##Plot 1: Relationship between Price and AVERAGE PER CAPITA INCOME depend on Coast
+```{r}
+#graph
+library(ggplot2)
+p1 <- ggplot(housing, aes(apci, price)) + 
+  geom_point(aes(colour = coast, shape = coast)) + 
+  geom_smooth(aes(colour = coast), se=FALSE, method="lm") + 
+  ggtitle("Plot 1: Scatter Plot of Average Sell Price versus Average Per Capita Income") +
+  xlab("Average Per Capita Income(1000$)") +
+  ylab("Average Sell Price(1000$)")
+p1
+```
+
+```{r}
+library(dplyr)
+#statistics
+fit1 = housing %>% group_by(coast) %>% do(model = lm(price ~ apci, data = .))
+paste("coast:",levels(housing$coast)[1])
+round(fit1$model[[1]]$coefficients,3)
+paste("coast:",levels(housing$coast)[2])
+round(fit1$model[[2]]$coefficients,3)
+```
+
+##Plot 2: Boxplot of Average Sell Price of Area with Rent Control
+```{r}
+library(dplyr)
+#statistic
+#https://stackoverflow.com/questions/10220510/summary-statistics-by-two-or-more-factor-variables
+house <- housing %>%
+select(coast, rent, price) %>%
+group_by(coast, rent) %>%
+summarise(median = median(price), sd = sd(price), n = length(price))
+house
+write.csv(house, file = "stat2.csv", row.names = T)
+```
+
+```{r}
+#https://stackoverflow.com/questions/23010009/how-to-create-three-way-interaction-graph-in-r-i-have-example-of-graph
+#https://ggplot2.tidyverse.org/reference/labellers.html
+ggplot(data = housing, aes(x = price)) + 
+  geom_density(aes(group = rent, colour = rent, fill = rent), 
+               alpha=0.4) + 
+  geom_vline(data = house, aes(xintercept=house$median, colour=rent),
+             linetype="dashed", size=0.5) +
+  geom_text(data = house, aes(label = house$median, y=0.01, x=house$median, colour=rent)) + 
+  facet_wrap(.~ coast, labeller=label_both) +
+  ggtitle("Plot 2: Density plot of Average Sell Price of Area with Rent Control") + 
+  xlab("Average Sell Price(1000$)")
+```
+
+#Plot 3: Barplot of Area with Rent Control
+```{r}
+#bar plot
+ndf <- group_by(housing, rent, coast) %>% summarize( count = n() )
+# Stacked barplot with multiple groups
+ggplot(data=ndf , aes(x=rent, y = count, fill=rent)) +
+  geom_bar(stat="identity", position = "dodge")+
+  ggtitle("Plot 3: Barplot of Area with Rent Control") +
+  geom_text(data = house, aes(label = n, y=n+10, x=rent, colour=rent)) + 
+  facet_wrap(.~ coast, labeller=label_both)
+```
+
+
+#Plot 4: Boxplot of Average Sell Price versus Year
+```{r}
+#graph
+#https://sebastiansauer.github.io/vis_interaction_effects/
+ggplot(housing) +
+  aes(x = year, y = price, color = coast) +
+  geom_boxplot() +
+  geom_jitter() +
+  facet_wrap(~coast) +
+  stat_summary(fun.y=mean, geom="line", aes(group=1))  + 
+  stat_summary(fun.y=mean, geom="point") +
+  stat_summary(fun.y=mean, geom="text", show.legend = FALSE, 
+               vjust=-0.7, aes( label=round(..y.., digits=1))) +
+  ggtitle("Plot 4: Boxplot of Average Sell Price versus Year") + 
+  ylab("Average Sell Price(1000$)") + 
+  xlab("Year")
+```
+
+```{r}
+library(dplyr)
+house2 <- housing %>%
+select(year, coast, price) %>%
+group_by(year, coast) %>%
+summarise(median = median(price), sd = sd(price))
+house2
+write.csv(house2, file = "stat3.csv", row.names = T)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+Data form as a .csv file. Here is some information on the data: 
+
+Description: Data were collected on average sale prices of houses in several metropolitan statistical areas. 
+The point of the study was to explore the relationship between housing prices 
+and several other variables thought to be related. 
+Data file: housing.csv
+Variables in the study: 
+apci = average per capita income
+p.growth = percentage growth in per capita income
+rei = regulatory environment index (higher values indicate a larger number of regulations)
+rent = rent control (0 indicates no rent control, 1 indicates some rent control)
+coast = adjacent to a coastline (0=no, 1=yes)
+msa = Metropolitan Statistical Area in which houses are located
+year = year (1981 to 1989)
+price = average sale price in thousands of dollars
+Note: You may want to consider transformations of one or more variables. 
+
